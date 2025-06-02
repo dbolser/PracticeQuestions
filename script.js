@@ -165,48 +165,82 @@ let currentHintIndex = 0; // Tracks hints used for the *current* question
 // Updated Hints
 const questionHints = {
     // Fractions Easy
-    "Calculate: 2/3 + 1/4": ["Find a common denominator (12). Convert: 8/12 + 3/12.", "8/12 + 3/12 = 11/12"],
-    "What is 3/5 of 20?": ["'Of' means multiply: 3/5 × 20.", "(3 × 20) / 5 = 60 / 5 = 12"],
-    "Simplify: 12/18": ["Find the GCD of 12 and 18 (it's 6).", "Divide numerator and denominator by 6: (12÷6)/(18÷6) = 2/3"],
-    "Calculate: 7/8 - 1/4": ["Common denominator is 8. Convert 1/4 to 2/8.", "7/8 - 2/8 = 5/8"],
-    "What is 1/2 of 50?": ["'Of' means multiply. So, 1/2 × 50.", "50 divided by 2 is 25."],
-    "Calculate: 1/5 + 2/5": ["The denominators are already the same.", "Add the numerators: (1+2)/5 = 3/5."],
-    "You have a chocolate bar with 8 squares. You eat 2 squares. What fraction did you eat (simplified)?": ["The fraction is (squares eaten) / (total squares) = 2/8.", "Simplify 2/8 by dividing the top and bottom by their greatest common divisor (2).", "2/8 = 1/4"],
+    "Calculate: 2/3 + 1/4": ["Find a common denominator. The LCM of 3 and 4 is 12.", "Convert fractions: 2/3 = 8/12 and 1/4 = 3/12.", "Add the numerators: 8/12 + 3/12 = 11/12."],
+    "What is 3/5 of 20?": ["The word 'of' means multiply. So, the problem is 3/5 × 20.", "You can write 20 as 20/1. Then multiply: (3 × 20) / (5 × 1) = 60/5.", "Simplify the fraction: 60 ÷ 5 = 12."],
+    "Simplify: 12/18": ["Find the greatest common divisor (GCD) of 12 and 18.", "The GCD of 12 and 18 is 6.", "Divide both the numerator and the denominator by 6: (12÷6)/(18÷6) = 2/3."],
+    "Calculate: 7/8 - 1/4": ["Find a common denominator. The LCM of 8 and 4 is 8.", "Convert 1/4 to eighths: 1/4 = 2/8.", "Subtract the numerators: 7/8 - 2/8 = 5/8."],
+    "What is 1/2 of 50?": ["'Of' means multiply. So, this is 1/2 × 50.", "Multiply 1 by 50 (which is 50), and keep the denominator 2. So, 50/2.", "50 divided by 2 is 25."],
+    "Calculate: 1/5 + 2/5": ["The denominators are already the same (5).", "When denominators are the same, just add the numerators.", "(1+2)/5 = 3/5."],
+    "You have a chocolate bar with 8 squares. You eat 2 squares. What fraction did you eat (simplified)?": ["The fraction is (squares eaten) / (total squares) = 2/8.", "To simplify, find the greatest common divisor (GCD) of 2 and 8.", "The GCD is 2. Divide numerator and denominator by 2: (2÷2)/(8÷2) = 1/4."],
 
     // Fractions Medium
-    "A recipe needs 2 1/3 cups of flour. If Sarah wants to make 1 1/2 times the recipe, how much flour does she need?": ["Convert to improper fractions: 2 1/3 = 7/3, 1 1/2 = 3/2.", "Multiply: (7/3) × (3/2) = 21/6.", "Simplify 21/6 to 7/2, which is 3 1/2."],
-    "Calculate: 2/3 × 5/8": ["Multiply numerators (2×5=10), multiply denominators (3×8=24).", "10/24. Simplify by dividing by 2.", "5/12"],
-    "What is 3/4 ÷ 2/5?": ["Multiply by the reciprocal: 3/4 × 5/2.", "(3×5)/(4×2) = 15/8.", "Convert to mixed number: 1 7/8"],
+    "A recipe needs 2 1/3 cups of flour. If Sarah wants to make 1 1/2 times the recipe, how much flour does she need?": ["Convert mixed numbers to improper fractions. 2 1/3 = (2*3+1)/3 = 7/3.  1 1/2 = (1*2+1)/2 = 3/2.", "Multiply the improper fractions: (7/3) × (3/2).", "Multiply numerators (7×3=21) and denominators (3×2=6) to get 21/6 cups.", "Simplify 21/6. Both are divisible by 3: (21÷3)/(6÷3) = 7/2 cups. Convert to mixed number: 3 1/2 cups."],
+    "Calculate: 2/3 × 5/8": ["To multiply fractions, multiply the numerators together and the denominators together.", "Numerators: 2 × 5 = 10.", "Denominators: 3 × 8 = 24.", "The result is 10/24. Simplify this fraction by dividing numerator and denominator by their GCD (2). Answer: 5/12."],
+    "What is 3/4 ÷ 2/5?": ["To divide by a fraction, multiply by its reciprocal.", "The reciprocal of 2/5 is 5/2.", "So, the problem becomes 3/4 × 5/2.", "Multiply numerators (3×5=15) and denominators (4×2=8): 15/8. Convert to mixed number: 1 7/8."],
 
     // Fractions Hard
-    "Solve: x/4 + x/6 = 5": ["Common denominator for 4 and 6 is 12. Equation becomes 3x/12 + 2x/12 = 5.", "So, 5x/12 = 5. Multiply by 12: 5x = 60.", "x = 60/5 = 12"],
+    "Solve: x/4 + x/6 = 5": ["Find a common denominator for 4 and 6. The LCM is 12.", "Rewrite the equation with the common denominator: (3x/12) + (2x/12) = 5.", "Combine the fractions: 5x/12 = 5.", "Multiply both sides by 12: 5x = 60.", "Solve for x: x = 60/5 = 12."],
     "A tank is 1/4 full. After adding 10 litres, it becomes 3/4 full. What is the capacity of the tank?": [
-        "The change in fullness is 3/4 - 1/4 = 2/4 = 1/2 of the tank.",
-        "This 1/2 of the tank corresponds to 10 litres.",
-        "If 1/2 of tank = 10 litres, then the full tank (2/2) is 10 × 2 = 20 litres."
+        "First, find the fraction of the tank that was filled by the 10 litres.",
+        "Change in fullness = (New fraction) - (Old fraction) = 3/4 - 1/4 = 2/4.",
+        "Simplify the fraction: 2/4 = 1/2. So, 1/2 of the tank was filled by 10 litres.",
+        "If 1/2 of the tank is 10 litres, the full capacity (2/2 or whole tank) is 10 litres × 2 = 20 litres."
     ],
-    "Calculate: (2/3 + 1/4) × 6/11": ["Brackets first: 2/3 + 1/4 = 8/12 + 3/12 = 11/12.", "Now multiply: (11/12) × (6/11).", "You can cancel the 11s. (1/12) × 6 = 6/12, which simplifies to 1/2."],
+    "Calculate: (2/3 + 1/4) × 6/11": ["First, solve the operation inside the parentheses: 2/3 + 1/4.",
+        "Common denominator for 2/3 and 1/4 is 12. So, 8/12 + 3/12 = 11/12.",
+        "Now the problem is (11/12) × (6/11).",
+        "Multiply numerators and denominators: (11×6)/(12×11). You can cancel the 11s.",
+        "This simplifies to 6/12, which further simplifies to 1/2."],
 
     // Geometry Easy
-    "Find the area of a rectangle with length 8cm and width 5cm.": ["Area = length × width.", "8 × 5 = 40"],
-    "What is the perimeter of a square with sides of 7cm?": ["Perimeter = 4 × side length.", "4 × 7 = 28"],
-    "Find the area of a triangle with base 6cm and height 4cm.": ["Area = 1/2 × base × height.", "1/2 × 6 × 4 = 12"],
-    "Calculate the circumference of a circle with radius 3cm. (Use π = 3.14)": ["Circumference = 2 × π × radius.", "2 × 3.14 × 3 = 18.84"],
+    "Find the area of a rectangle with length 8cm and width 5cm.": ["The formula for the area of a rectangle is Length × Width.", "Area = 8 cm × 5 cm.", "8 × 5 = 40. The unit is cm² because area is a 2D measure. Answer: 40 cm²."],
+    "What is the perimeter of a square with sides of 7cm?": ["The perimeter is the total length of all sides. A square has 4 equal sides.", "Perimeter = 4 × side length.", "Perimeter = 4 × 7 cm = 28 cm."],
+    "Find the area of a triangle with base 6cm and height 4cm.": ["The formula for the area of a triangle is 1/2 × base × height.", "Area = 1/2 × 6 cm × 4 cm.", "Area = 1/2 × 24 cm² = 12 cm²."],
+    "Calculate the circumference of a circle with radius 3cm. (Use π = 3.14)": ["The formula for circumference is 2 × π × radius (or π × diameter).", "Circumference = 2 × 3.14 × 3 cm.", "2 × 3.14 = 6.28. Then, 6.28 × 3 cm = 18.84 cm."],
 
     // Geometry Medium
-    "Find the area of a parallelogram with base 12cm and height 8cm.": ["Area = base × height.", "12 × 8 = 96"],
-    "A circle has a diameter of 14cm. Find its area. (Use π = 3.14)": ["Radius = diameter/2 = 14/2 = 7cm.", "Area = π × radius² = 3.14 × 7².", "3.14 × 49 = 153.86"],
-    "Find the volume of a cuboid with dimensions 6cm × 4cm × 5cm.": ["Volume = length × width × height.", "6 × 4 × 5 = 120"],
-    "In a right-angled triangle, two sides are 3cm and 4cm. Find the length of the hypotenuse.": ["Use Pythagoras: a² + b² = c².", "3² + 4² = 9 + 16 = 25.", "c = √25 = 5"],
+    "Find the area of a parallelogram with base 12cm and height 8cm.": ["The formula for the area of a parallelogram is base × height.", "Area = 12 cm × 8 cm.", "12 × 8 = 96. The unit is cm². Answer: 96 cm²."],
+    "A circle has a diameter of 14cm. Find its area. (Use π = 3.14)": ["First, find the radius from the diameter. Radius = Diameter / 2.", "Radius = 14 cm / 2 = 7 cm.", "The formula for the area of a circle is π × radius².", "Area = 3.14 × (7 cm)² = 3.14 × 49 cm².", "3.14 × 49 = 153.86. Answer: 153.86 cm²."],
+    "Find the volume of a cuboid with dimensions 6cm × 4cm × 5cm.": ["The formula for the volume of a cuboid is Length × Width × Height.", "Volume = 6 cm × 4 cm × 5 cm.", "6 × 4 = 24. Then, 24 × 5 = 120. The unit is cm³ because volume is a 3D measure. Answer: 120 cm³."],
+    "In a right-angled triangle, two sides are 3cm and 4cm. Find the length of the hypotenuse.": ["Use the Pythagorean theorem: a² + b² = c², where c is the hypotenuse.", "Let a = 3 cm and b = 4 cm. So, (3cm)² + (4cm)² = c².", "9 cm² + 16 cm² = c²  =>  25 cm² = c².", "c = √25cm² = 5 cm."],
 
     // Geometry Hard
-    "The area of a circle is 78.5 cm². Find its radius. (Use π = 3.14)": ["Area = π × r². So, 78.5 = 3.14 × r².", "r² = 78.5 / 3.14 = 25.", "r = √25 = 5"],
-    "A trapezium has parallel sides of lengths 8cm and 12cm, and a height of 5cm. Find its area.": ["Area = 1/2 × (sum of parallel sides) × height.", "1/2 × (8+12) × 5 = 1/2 × 20 × 5.", "10 × 5 = 50"],
-    "Find the surface area of a cylinder with radius 4cm and height 10cm. (Use π = 3.14)": ["SA = 2πr² + 2πrh.", "2πr² = 2 × 3.14 × 4² = 100.48.  2πrh = 2 × 3.14 × 4 × 10 = 251.2.", "100.48 + 251.2 = 351.68"],
-    "In triangle ABC, angle A = 40° and angle B = 65°. What is the measure of angle C?": ["Sum of angles in a triangle is 180°.", "Angle C = 180° - (Angle A + Angle B).", "C = 180° - (40° + 65°) = 180° - 105° = 75°"],
-    "A triangle has a base of 10cm and a height of 8cm. What is its area?": ["Area = 1/2 × base × height.", "1/2 × 10cm × 8cm.", "1/2 × 80cm² = 40cm²"]
+    "The area of a circle is 78.5 cm². Find its radius. (Use π = 3.14)": [
+        "The formula for area is A = π × r².",
+        "We have A = 78.5 cm² and π = 3.14. So, 78.5 = 3.14 × r².",
+        "To find r², divide the area by π: r² = 78.5 cm² / 3.14.",
+        "r² = 25 cm². Now take the square root to find r.",
+        "r = √25cm² = 5 cm."
+    ],
+    "A trapezium has parallel sides of lengths 8cm and 12cm, and a height of 5cm. Find its area.": [
+        "The formula for the area of a trapezium is 1/2 × (sum of parallel sides) × height.",
+        "Let the parallel sides be a and b. So, a = 8 cm and b = 12 cm. Height h = 5 cm.",
+        "Sum of parallel sides = a + b = 8 cm + 12 cm = 20 cm.",
+        "Area = 1/2 × 20 cm × 5 cm.",
+        "Area = 10 cm × 5 cm = 50 cm²."
+    ],
+    "Find the surface area of a cylinder with radius 4cm and height 10cm. (Use π = 3.14)": [
+        "The surface area (SA) of a cylinder = (Area of two circular bases) + (Area of the curved side).",
+        "Area of one circular base = π × r². So, two bases = 2πr².",
+        "Area of the curved side = Circumference × height = 2πrh.",
+        "SA = 2πr² + 2πrh = 2 × 3.14 × (4cm)² + 2 × 3.14 × 4cm × 10cm.",
+        "2πr² = 2 × 3.14 × 16cm² = 100.48 cm².  2πrh = 2 × 3.14 × 40cm² = 251.2 cm².",
+        "Total SA = 100.48 cm² + 251.2 cm² = 351.68 cm²."
+    ],
+    "In triangle ABC, angle A = 40° and angle B = 65°. What is the measure of angle C?": [
+        "The sum of all interior angles in any triangle is always 180°.",
+        "So, Angle A + Angle B + Angle C = 180°.",
+        "40° + 65° + Angle C = 180°.",
+        "105° + Angle C = 180°.",
+        "Angle C = 180° - 105° = 75°."
+    ],
+    "A triangle has a base of 10cm and a height of 8cm. What is its area?": [
+        "The formula for the area of a triangle is 1/2 × base × height.",
+        "Given: base = 10 cm, height = 8 cm.",
+        "Area = 1/2 × 10 cm × 8 cm.",
+        "Area = 1/2 × 80 cm² = 40 cm²."
+    ]
 };
-
 
 function resetHintsForNewQuestion() {
     currentHintIndex = 0; // Reset index for hints of the new question

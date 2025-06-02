@@ -244,6 +244,7 @@ button:hover {
 .level-go-btn:hover {
     background: #357abd;
 }
+
 .answer-unit-display {
     margin-left: 0.5rem;
     color: var(--secondary-color);
@@ -269,7 +270,7 @@ button:hover {
 }
 
 .progress-item.answered-incorrect {
-    background: #fbd38d;
-    color: #744210;
-    border: 2px solid #f6ad55;
+    background: #fee2e2;
+        color: #991b1b;
+        border: 2px solid #fca5a5;
 }
