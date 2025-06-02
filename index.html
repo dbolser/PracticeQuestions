@@ -15,8 +15,24 @@
             <div class="stats">
                 <div class="level">Level: <span id="level">1</span></div>
                 <div class="score">Score: <span id="score">0</span></div>
+                <div class="streak">Streak: <span id="streak">0</span></div>
             </div>
         </header>
+
+        <div class="level-selector">
+            <label for="category-select">Category:</label>
+            <select id="category-select">
+                <option value="fractions">Fractions</option>
+                <option value="geometry">Geometry</option>
+            </select>
+            <label for="difficulty-select">Difficulty:</label>
+            <select id="difficulty-select">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button id="level-go" class="level-go-btn">Go</button>
+        </div>
 
         <main>
             <div class="question-container">
@@ -25,7 +41,10 @@
                     <input type="text" id="answer" placeholder="Enter your answer">
                     <button id="submit">Submit</button>
                 </div>
+                <button id="hint" class="hint-btn">Hint (3 left)</button>
             </div>
+
+            <div id="progress-bar" class="progress-bar"></div>
 
             <div class="feedback" id="feedback"></div>
 
