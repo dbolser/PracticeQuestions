@@ -196,6 +196,18 @@ button:hover {
 body.dark-mode .badge {
     opacity: 0.7;
 }
+body.dark-mode .badge.earned {
+    /* Make earned badges glow in dark mode with LED greenish color */
+    box-shadow: 0 0 8px 2px #39FF14,
+        /* Inner LED green glow */
+        0 0 12px 3px rgba(57, 255, 20, 0.7);
+    /* Softer outer LED green glow */
+    /* Optionally, if the badge background itself needs to change for the glow to look good */
+    /* background-color: #222; */
+    /* Darker badge bg for green glow perhaps */
+    /* color: #39FF14; */
+    /* Text color to match glow, if desired */
+}
 .badge.earned {
     opacity: 1;
     animation: pop 0.5s ease-out;
