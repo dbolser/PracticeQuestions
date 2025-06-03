@@ -61,7 +61,11 @@ let badges = {
     'Math Master': false,
     'Geometry Genius': false,
     'Fractions Expert': false,
-    'Streak Master': false
+    'Streak Master': false,
+    'Fractions Novice': false,
+    'Fractions Adept': false,
+    'Geometry Novice': false,
+    'Geometry Adept': false
 };
 let answered = {
     fractions: { easy: [], medium: [], hard: [] },
@@ -85,6 +89,8 @@ const levelGoBtn = document.getElementById('level-go');
 const resetGameBtn = document.getElementById('reset-game'); // New Reset Button
 const themeToggle = document.getElementById('theme-toggle');
 const bodyElement = document.body;
+const levelDisplayElement = document.getElementById('level-display');
+const confettiCanvas = document.getElementById('confetti-canvas');
 
 // Initialize badges display
 function initializeBadges() {
@@ -110,20 +116,45 @@ function getUnansweredQuestions() {
 function renderProgressBar() {
     const bar = document.getElementById('progress-bar');
     if (!bar) return;
-    const all = questions[currentCategory][currentDifficulty];
-    const ans = answered[currentCategory][currentDifficulty];
-    if (!all) { bar.innerHTML = ''; return; } // Ensure 'all' exists
-
     bar.innerHTML = '';
-    all.forEach((q, i) => {
+
+    if (questionsForCurrentSet.length === 0 && !gameComplete) {
+        // Still show 3 placeholders if level is about to start or in transition
+        for (let i = 0; i < 3; i++) {
+            const item = document.createElement('div');
+            item.className = 'progress-item';
+            item.textContent = i + 1;
+            bar.appendChild(item);
+        }
+        return;
+    }
+    if (gameComplete && questionsForCurrentSet.length === 0) {
+        // Potentially show all levels as completed, or a summary.
+        // For now, if game is complete and no current set, clear bar or show generic complete.
+        bar.innerHTML = "<p style='color: var(--text-color);'>All Levels Done!</p>";
+        return;
+    }
+
+    for (let i = 0; i < questionsForCurrentSet.length; i++) {
         const item = document.createElement('div');
         item.className = 'progress-item';
-        if (ans[i] && ans[i].correct) item.classList.add('answered');
-        else if (ans[i] && !ans[i].correct) item.classList.add('answered-incorrect'); // Optional: style for tried but wrong
-        if (currentQuestion && q.question === currentQuestion.question) item.classList.add('current');
+        const qData = questionsForCurrentSet[i]; // qData is the question object itself
+
+        // We need to track attempt/correctness for these 3 questions specifically for the progress bar
+        // Let's assume qData gets a temporary status like qData.attemptedCorrectly for this set.
+        if (qData.attemptedInSet) {
+            if (qData.answeredCorrectlyInSet) {
+                item.classList.add('answered');
+            } else {
+                item.classList.add('answered-incorrect');
+            }
+        }
+        if (i === currentQuestionInSetIndex && !gameComplete) {
+            item.classList.add('current');
+        }
         item.textContent = i + 1;
         bar.appendChild(item);
-    });
+    }
 }
 
 // Get next unanswered question
@@ -626,5 +657,357 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hintButton) hintButton.style.display = 'none';
         if (feedbackElement && feedbackElement.textContent === '') feedbackElement.textContent = 'Welcome back! You had completed the game.';
         renderProgressBar();
+    }
+});
+
+// --- NEW GAME STRUCTURE & STATE ---
+const gameLevels = [
+    { name: "Fractions Easy", category: "fractions", difficulty: "easy", questionsToPick: 3, badgeUnlock: "Fractions Novice" },
+    { name: "Fractions Medium", category: "fractions", difficulty: "medium", questionsToPick: 3, badgeUnlock: "Fractions Adept" },
+    { name: "Fractions Hard", category: "fractions", difficulty: "hard", questionsToPick: 3, badgeUnlock: "Fractions Expert" }, // Existing badge
+    { name: "Geometry Easy", category: "geometry", difficulty: "easy", questionsToPick: 3, badgeUnlock: "Geometry Novice" },
+    { name: "Geometry Medium", category: "geometry", difficulty: "medium", questionsToPick: 3, badgeUnlock: "Geometry Adept" },
+    { name: "Geometry Hard", category: "geometry", difficulty: "hard", questionsToPick: 3, badgeUnlock: "Geometry Genius" } // Existing badge
+];
+let currentGlobalLevelIndex = 0;
+let questionsForCurrentSet = [];
+let questionsAttemptedInSet = 0;
+let questionsCorrectInSet = 0;
+let currentQuestionInSetIndex = 0; // To track which of the 3 questions is current
+
+// --- CORE GAME FLOW REFACTOR ---
+function startGlobalLevel() {
+    if (currentGlobalLevelIndex >= gameLevels.length) {
+        handleGameWon();
+        return;
+    }
+
+    const levelData = gameLevels[currentGlobalLevelIndex];
+    currentCategory = levelData.category;
+    currentDifficulty = levelData.difficulty;
+
+    if (levelDisplayElement) {
+        levelDisplayElement.textContent = `Level ${currentGlobalLevelIndex + 1}: ${levelData.name}`;
+    }
+
+    // Select 3 unique random questions
+    const allQuestionsInLevel = questions[currentCategory][currentDifficulty];
+    if (!allQuestionsInLevel || allQuestionsInLevel.length === 0) {
+        console.error(`No questions found for ${currentCategory} - ${currentDifficulty}`);
+        // Skip to next level or handle error
+        currentGlobalLevelIndex++;
+        startGlobalLevel();
+        return;
+    }
+    // Shuffle and pick
+    const shuffled = [...allQuestionsInLevel].sort(() => 0.5 - Math.random());
+    questionsForCurrentSet = shuffled.slice(0, levelData.questionsToPick);
+    // Clear previous attempt statuses from these question objects if they persist across playthroughs
+    questionsForCurrentSet.forEach(q => {
+        delete q.attemptedInSet;
+        delete q.answeredCorrectlyInSet;
+    });
+
+    questionsAttemptedInSet = 0;
+    questionsCorrectInSet = 0;
+    currentQuestionInSetIndex = 0;
+    gameComplete = false; // Reset gameComplete flag if restarting a level or starting a new one
+
+    // Ensure UI is ready for a new level/set
+    if (answerInput) answerInput.style.display = '';
+    if (submitButton) submitButton.style.display = '';
+    if (hintButton) hintButton.style.display = '';
+    if (answerInput) answerInput.disabled = false;
+    if (submitButton) submitButton.disabled = false;
+
+    displayQuestionFromSet();
+    resetHintsForNewQuestion(); // Resets hint availability for the new question
+    updateStreakDisplay(); // Streak might reset per level or continue; current logic resets it.
+    // saveProgress(); // Save at the start of a new global level
+}
+
+function displayQuestionFromSet() {
+    if (currentQuestionInSetIndex >= questionsForCurrentSet.length) {
+        // This case should ideally be handled by checkAnswer after 3 attempts
+        console.warn("Attempted to display question beyond current set length.");
+        return;
+    }
+    currentQuestion = questionsForCurrentSet[currentQuestionInSetIndex];
+
+    if (questionElement) questionElement.textContent = currentQuestion.question;
+    if (answerInput) answerInput.value = '';
+    if (answerUnitElement) {
+        answerUnitElement.textContent = currentQuestion.unit || '';
+        answerUnitElement.style.display = currentQuestion.unit ? 'inline-block' : 'none';
+    }
+    if (feedbackElement) {
+        feedbackElement.textContent = '';
+        feedbackElement.className = 'feedback p-2 my-2 rounded-md text-sm';
+    }
+    if (answerInput) answerInput.focus();
+
+    renderProgressBar();
+    updateHintButton(); // Update hint button based on the new question and remaining lives
+    resetHintsForNewQuestion(); // Ensure currentHintIndex for *specific question hints* is reset
+}
+
+function checkAnswer(userAnswer) {
+    if (!currentQuestion || gameComplete) return;
+
+    const correctAnswer = currentQuestion.answer.toLowerCase().trim();
+    userAnswer = userAnswer.toLowerCase().trim();
+
+    // Mark in overall answered structure (for potential review mode/perfect score later)
+    const allQuestionsInCategory = questions[currentCategory][currentDifficulty];
+    const overallQuestionIndex = allQuestionsInCategory.findIndex(q => q.question === currentQuestion.question);
+    if (overallQuestionIndex !== -1) {
+        if (!answered[currentCategory][currentDifficulty][overallQuestionIndex]) {
+            answered[currentCategory][currentDifficulty][overallQuestionIndex] = { correct: false, attempts: 0 };
+        }
+        answered[currentCategory][currentDifficulty][overallQuestionIndex].attempts++;
+    }
+
+    currentQuestion.attemptedInSet = true; // Mark for progress bar
+    if (userAnswer === correctAnswer) {
+        score += 10;
+        consecutiveCorrect++;
+        questionsCorrectInSet++;
+        currentQuestion.answeredCorrectlyInSet = true; // Mark for progress bar
+        if (answered[currentCategory][currentDifficulty][overallQuestionIndex]) {
+            answered[currentCategory][currentDifficulty][overallQuestionIndex].correct = true;
+        }
+
+        if (feedbackElement) {
+            feedbackElement.textContent = 'Correct! 🎉';
+            feedbackElement.className = 'feedback p-2 my-2 rounded-md text-sm bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-100';
+        }
+        if (!badges['First Question']) badges['First Question'] = true;
+        if (consecutiveCorrect >= 3 && !badges['Streak Master']) badges['Streak Master'] = true;
+
+    } else { // Incorrect Answer
+        consecutiveCorrect = 0;
+        currentQuestion.answeredCorrectlyInSet = false; // Mark for progress bar
+        if (feedbackElement) {
+            feedbackElement.textContent = `Incorrect. The correct answer was: ${currentQuestion.answer}.`;
+            feedbackElement.className = 'feedback p-2 my-2 rounded-md text-sm bg-red-100 dark:bg-red-700 text-red-700 dark:text-red-100';
+        }
+        // No hint given automatically on wrong answer here, user must click hint button.
+    }
+
+    questionsAttemptedInSet++;
+    // Update score, badges, streak display immediately
+    if (scoreElement) scoreElement.textContent = score;
+    initializeBadges(); // This will check new level-based badges if criteria met elsewhere
+    updateStreakDisplay();
+    renderProgressBar(); // Update progress bar after attempt
+
+    // Disable input until next question or level decision
+    if (answerInput) answerInput.disabled = true;
+    if (submitButton) submitButton.disabled = true;
+
+    setTimeout(() => {
+        if (answerInput) answerInput.disabled = false;
+        if (submitButton) submitButton.disabled = false;
+
+        if (questionsAttemptedInSet >= questionsForCurrentSet.length) { // All 3 questions in set attempted
+            if (questionsCorrectInSet === questionsForCurrentSet.length) { // Level Beaten!
+                const levelData = gameLevels[currentGlobalLevelIndex];
+                if (levelData.badgeUnlock && !badges[levelData.badgeUnlock]) {
+                    badges[levelData.badgeUnlock] = true;
+                    initializeBadges(); // Re-render badges
+                    // Announce badge? feedbackElement.textContent = `Badge Unlocked: ${levelData.badgeUnlock}!`;
+                }
+                triggerConfetti(); // Phase 2
+                if (feedbackElement) feedbackElement.textContent = `Level Complete! ${levelData.name} cleared!`;
+                currentGlobalLevelIndex++;
+                saveProgress(); // Save after successfully completing a global level
+                setTimeout(startGlobalLevel, 2500); // Delay before starting next level
+            } else { // Level Failed for this set
+                if (feedbackElement) feedbackElement.textContent = `You got ${questionsCorrectInSet} of ${questionsForCurrentSet.length} correct. Let's try this level again!`;
+                // Do not save progress if level failed, player will retry
+                setTimeout(startGlobalLevel, 2500); // Restart current level with new questions
+            }
+        } else { // More questions in this set
+            currentQuestionInSetIndex++;
+            displayQuestionFromSet();
+            // saveProgress(); // Or save progress after each question attempt
+        }
+    }, 1500); // Delay for user to see feedback
+}
+
+function handleGameWon() {
+    gameComplete = true;
+    if (questionElement) questionElement.textContent = '🎉 Congratulations! You have completed all levels!';
+    if (answerInput) answerInput.style.display = 'none';
+    if (answerUnitElement) answerUnitElement.style.display = 'none';
+    if (submitButton) submitButton.style.display = 'none';
+    if (hintButton) hintButton.style.display = 'none';
+    if (feedbackElement) feedbackElement.textContent = 'Amazing job! You are a Math Master!';
+    if (!badges['Math Master']) {
+        badges['Math Master'] = true;
+        initializeBadges();
+    }
+    renderProgressBar(); // Show final state
+    triggerConfetti();
+    saveProgress(); // Save final game won state
+}
+
+// --- Confetti Placeholder ---
+function triggerConfetti() {
+    console.log("CONFETTI! 🎉"); // Placeholder
+    if (confettiCanvas) {
+        confettiCanvas.style.display = 'block';
+        // Basic confetti logic (example)
+        const ctx = confettiCanvas.getContext('2d');
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        confettiCanvas.width = W;
+        confettiCanvas.height = H;
+        let particles = [];
+        for (let i = 0; i < 250; i++) {
+            particles.push({
+                x: Math.random() * W, y: Math.random() * H * 0.5, r: Math.random() * 5 + 2,
+                d: Math.random() * 250, //density
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                tilt: Math.floor(Math.random() * 10) - 10,
+                tiltAngle: 0, tiltAngleIncrement: Math.random() * 0.07 + 0.05
+            });
+        }
+        let animationFrameId;
+        function drawConfetti() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach((p, i) => {
+                ctx.beginPath();
+                ctx.lineWidth = p.r / 2;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+                ctx.stroke();
+                p.tiltAngle += p.tiltAngleIncrement;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.tilt = Math.sin(p.tiltAngle - i / 8) * 15;
+                if (p.y > H) particles[i] = { x: Math.random() * W, y: -20, r: p.r, d: p.d, color: p.color, tilt: p.tilt, tiltAngle: p.tiltAngle, tiltAngleIncrement: p.tiltAngleIncrement };
+            });
+            animationFrameId = requestAnimationFrame(drawConfetti);
+        }
+        drawConfetti();
+        setTimeout(() => {
+            cancelAnimationFrame(animationFrameId);
+            confettiCanvas.style.display = 'none';
+        }, 4000); // Confetti for 4 seconds
+    }
+}
+
+// --- LOCALSTORAGE ADAPTATION (Ensure currentGlobalLevelIndex is saved/loaded) ---
+function saveProgress() {
+    const progress = {
+        score, badges: { ...badges }, answered: JSON.parse(JSON.stringify(answered)),
+        currentGlobalLevelIndex, // Save current global level
+        gameComplete
+        // currentCategory & currentDifficulty are now derived from currentGlobalLevelIndex
+    };
+    localStorage.setItem('mathGameProgress', JSON.stringify(progress));
+}
+
+function loadProgress() {
+    const savedProgress = localStorage.getItem('mathGameProgress');
+    if (savedProgress) {
+        try {
+            const progress = JSON.parse(savedProgress);
+            score = progress.score || 0;
+            badges = progress.badges || badges;
+            answered = progress.answered || { fractions: { easy: [], medium: [], hard: [] }, geometry: { easy: [], medium: [], hard: [] } };
+            currentGlobalLevelIndex = progress.currentGlobalLevelIndex || 0;
+            gameComplete = progress.gameComplete || false;
+
+            if (scoreElement) scoreElement.textContent = score;
+            // levelDisplayElement will be updated by startGlobalLevel
+            initializeBadges();
+            updateStreakDisplay(); // Streak is session-based
+
+        } catch (e) {
+            console.error("Error loading progress:", e);
+            localStorage.removeItem('mathGameProgress');
+            currentGlobalLevelIndex = 0; // Start fresh if error
+        }
+    }
+}
+
+// --- LEVEL SELECTOR ADAPTATION ---
+if (levelGoBtn) {
+    levelGoBtn.addEventListener('click', () => {
+        const selectedCategory = categorySelect.value;
+        const selectedDifficulty = difficultySelect.value;
+
+        const foundLevelIndex = gameLevels.findIndex(level => level.category === selectedCategory && level.difficulty === selectedDifficulty);
+
+        if (foundLevelIndex !== -1) {
+            currentGlobalLevelIndex = foundLevelIndex;
+            // Reset specific per-set counters, but overall score and badges persist
+            consecutiveCorrect = 0; // Reset streak when jumping levels
+            // gameComplete will be set by startGlobalLevel if needed
+            // answered is global, don't reset fully
+
+            // Reset UI elements for a fresh level start
+            if (answerInput) { answerInput.style.display = ''; answerInput.disabled = false; }
+            if (submitButton) { submitButton.style.display = ''; submitButton.disabled = false; }
+            if (hintButton) hintButton.style.display = '';
+            if (feedbackElement) feedbackElement.textContent = '';
+
+            startGlobalLevel();
+            saveProgress(); // Save new starting point
+        } else {
+            console.error("Selected level not found in gameLevels configuration.");
+            if (feedbackElement) feedbackElement.textContent = "Sorry, that level isn't available.";
+        }
+    });
+}
+
+// Modify resetGameData to use new structure
+function resetGameData() {
+    score = 0;
+    currentGlobalLevelIndex = 0;
+    consecutiveCorrect = 0;
+    gameComplete = false;
+    badges = Object.fromEntries(Object.keys(badges).map(key => [key, false]));
+    // Reset overall answered state
+    answered = {
+        fractions: { easy: [], medium: [], hard: [] },
+        geometry: { easy: [], medium: [], hard: [] }
+    };
+    localStorage.removeItem('mathGameProgress');
+
+    if (scoreElement) scoreElement.textContent = score;
+    initializeBadges();
+    updateStreakDisplay();
+    resetHintsForNewQuestion();
+
+    if (answerInput) { answerInput.style.display = ''; answerInput.disabled = false; }
+    if (submitButton) { submitButton.style.display = ''; submitButton.disabled = false; }
+    if (hintButton) hintButton.style.display = '';
+
+    startGlobalLevel(); // Start from the very first global level
+    if (feedbackElement) feedbackElement.textContent = "Game Reset!";
+    setTimeout(() => { if (feedbackElement) feedbackElement.textContent = ""; }, 2000);
+}
+
+// --- INITIALIZATION (DOMContentLoaded) ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadProgress(); // Load game state first (including currentGlobalLevelIndex)
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) applyTheme(savedTheme);
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+    else applyTheme('light');
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => applyTheme(e.matches ? "dark" : "light"));
+
+    initializeBadges();
+    updateStreakDisplay();
+    updateHintButton();
+
+    if (gameComplete) { // If loaded game was already complete
+        handleGameWon(); // Show the game won state
+    } else {
+        startGlobalLevel(); // Start at the loaded/default global level
     }
 });

@@ -411,3 +411,22 @@ body.dark-mode .theme-toggle-label {
 body.dark-mode .theme-toggle-checkbox:checked+.theme-toggle-label .theme-toggle-inner {
     background-color: var(--hint-btn-bg);
 }
+.level-display {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Allows clicks to go through */
+    z-index: 1000;
+    /* Make sure it's on top */
+    display: none;
+    /* Hidden by default */
+}
