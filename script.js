@@ -83,6 +83,8 @@ const categorySelect = document.getElementById('category-select');
 const difficultySelect = document.getElementById('difficulty-select');
 const levelGoBtn = document.getElementById('level-go');
 const resetGameBtn = document.getElementById('reset-game'); // New Reset Button
+const themeToggle = document.getElementById('theme-toggle');
+const bodyElement = document.body;
 
 // Initialize badges display
 function initializeBadges() {
@@ -490,7 +492,6 @@ function resetGameData() {
     setTimeout(() => { if (feedbackElement) feedbackElement.textContent = ""; }, 2000);
 }
 
-
 // Event listeners
 if (submitButton) {
     submitButton.addEventListener('click', () => {
@@ -560,22 +561,70 @@ if (resetGameBtn) {
     resetGameBtn.addEventListener('click', resetGameData);
 }
 
-// Initial setup
-document.addEventListener('DOMContentLoaded', () => {
-    loadProgress(); // Load progress first
-    initializeBadges(); // Then initialize UI elements
-    updateStreakDisplay();
-    updateHintButton(); // Initial state of hint button
+// Function to apply the saved theme or default to light
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        bodyElement.classList.add('dark-mode');
+        if (themeToggle) themeToggle.checked = true;
+    } else {
+        bodyElement.classList.remove('dark-mode');
+        if (themeToggle) themeToggle.checked = false;
+    }
+}
 
-    if (!gameComplete) { // Only show a new question if game wasn't loaded as complete
+// Function to handle theme toggle clicks
+function handleThemeToggle() {
+    if (themeToggle.checked) {
+        bodyElement.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        bodyElement.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Event listener for the theme toggle
+if (themeToggle) {
+    themeToggle.addEventListener('change', handleThemeToggle);
+}
+
+// --- Modify your existing DOMContentLoaded listener or add one --- 
+// Make sure the theme is applied after loading game progress
+document.addEventListener('DOMContentLoaded', () => {
+    loadProgress(); // Your existing function
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else {
+        // If no theme is saved, check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        } else {
+            applyTheme('light'); // Default to light
+        }
+    }
+    // Add listener for changes in system preference
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const newColorScheme = e.matches ? "dark" : "light";
+        applyTheme(newColorScheme);
+        // Optionally, update localStorage here if you want system changes to override user choice
+        // localStorage.setItem('theme', newColorScheme);
+    });
+
+    initializeBadges();
+    updateStreakDisplay();
+    updateHintButton();
+
+    if (!gameComplete) {
         showNextQuestion();
-    } else { // If game was loaded as complete, ensure UI reflects this
+    } else {
         if (questionElement) questionElement.textContent = '🎉 You have completed all questions!';
         if (answerInput) answerInput.style.display = 'none';
         if (answerUnitElement) answerUnitElement.style.display = 'none';
         if (submitButton) submitButton.style.display = 'none';
         if (hintButton) hintButton.style.display = 'none';
         if (feedbackElement && feedbackElement.textContent === '') feedbackElement.textContent = 'Welcome back! You had completed the game.';
-        renderProgressBar(); // Render progress even if complete
+        renderProgressBar();
     }
 });

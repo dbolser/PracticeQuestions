@@ -4,6 +4,46 @@
     --success-color: #2ecc71;
     --error-color: #e74c3c;
     --background-color: #f5f6fa;
+    --text-color: #2c3e50;
+        --card-background-color: white;
+        --input-border-color: #ddd;
+        --input-focus-border-color: var(--primary-color);
+        --progress-item-bg: #e0e7ef;
+        --progress-item-text: var(--secondary-color);
+        --progress-item-border: #b0c4de;
+        --progress-item-current-bg: #dbeafe;
+        --progress-item-current-border: var(--primary-color);
+        --progress-item-answered-incorrect-bg: #fee2e2;
+        --progress-item-answered-incorrect-text: #991b1b;
+        --progress-item-answered-incorrect-border: #fca5a5;
+        --hint-btn-bg: #fbbf24;
+        --hint-btn-text: #2c3e50;
+        --level-selector-bg: #f5f6fa;
+    
+        /* Dark Theme Colors */
+        --dark-background-color: #1a202c;
+        /* Slightly off-black */
+        --dark-text-color: #e2e8f0;
+        /* Light gray for text */
+        --dark-card-background-color: #2d3748;
+        /* Darker gray for cards */
+        --dark-secondary-color: #a0aec0;
+        /* Lighter secondary text */
+        --dark-input-border-color: #4a5568;
+        --dark-input-focus-border-color: var(--primary-color);
+        /* Keep primary for focus */
+        --dark-progress-item-bg: #4a5568;
+        --dark-progress-item-text: var(--dark-text-color);
+        --dark-progress-item-border: #718096;
+        --dark-progress-item-current-bg: #3b82f6;
+        /* Brighter blue for current in dark */
+        --dark-progress-item-answered-incorrect-bg: #521b1b;
+        --dark-progress-item-answered-incorrect-text: #fca5a5;
+        --dark-progress-item-answered-incorrect-border: #991b1b;
+        --dark-hint-btn-bg: #d69e2e;
+        /* Slightly darker yellow */
+        --dark-hint-btn-text: #1a202c;
+        --dark-level-selector-bg: #2d3748;
 }
 
 * {
@@ -15,7 +55,28 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--background-color);
+    color: var(--text-color);
     line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+    }
+    
+    body.dark-mode {
+        --background-color: var(--dark-background-color);
+        --text-color: var(--dark-text-color);
+        --card-background-color: var(--dark-card-background-color);
+        --secondary-color: var(--dark-secondary-color);
+        --input-border-color: var(--dark-input-border-color);
+        --input-focus-border-color: var(--dark-input-focus-border-color);
+        --progress-item-bg: var(--dark-progress-item-bg);
+        --progress-item-text: var(--dark-progress-item-text);
+        --progress-item-border: var(--dark-progress-item-border);
+        --progress-item-current-bg: var(--dark-progress-item-current-bg);
+        --progress-item-answered-incorrect-bg: var(--dark-progress-item-answered-incorrect-bg);
+        --progress-item-answered-incorrect-text: var(--dark-progress-item-answered-incorrect-text);
+        --progress-item-answered-incorrect-border: var(--dark-progress-item-answered-incorrect-border);
+        --hint-btn-bg: var(--dark-hint-btn-bg);
+        --hint-btn-text: var(--dark-hint-btn-text);
+        --level-selector-bg: var(--dark-level-selector-bg);
 }
 
 .container {
@@ -39,21 +100,22 @@ h1 {
     justify-content: center;
     gap: 2rem;
     font-size: 1.2rem;
-    color: var(--secondary-color);
+    color: var(--text-color);
 }
 
 .question-container {
-    background: white;
+    background: var(--card-background-color);
     padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+    color: var(--text-color);
 }
 
 .question {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
-    color: var(--secondary-color);
+    color: var(--text-color);
 }
 
 .input-container {
@@ -64,14 +126,16 @@ h1 {
 input {
     flex: 1;
     padding: 0.8rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--input-border-color);
     border-radius: 5px;
     font-size: 1rem;
+    background-color: var(--card-background-color);
+        color: var(--text-color);
 }
 
 input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--input-focus-border-color);
 }
 
 button {
@@ -105,10 +169,11 @@ button:hover {
 }
 
 .badges-container {
-    background: white;
+    background: var(--card-background-color);
     padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
 }
 
 .badges {
@@ -124,10 +189,13 @@ button:hover {
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.9rem;
-    opacity: 0.5;
+    opacity: 0.6;
     transition: opacity 0.3s;
 }
 
+body.dark-mode .badge {
+    opacity: 0.7;
+}
 .badge.earned {
     opacity: 1;
     animation: pop 0.5s ease-out;
@@ -146,6 +214,7 @@ button:hover {
         transform: scale(1);
     }
 }
+
 .progress-bar {
     display: flex;
     justify-content: center;
@@ -155,8 +224,8 @@ button:hover {
 }
 
 .progress-item {
-    background: #e0e7ef;
-    color: var(--secondary-color);
+    background: var(--progress-item-bg);
+        color: var(--progress-item-text);
     border-radius: 50%;
     width: 2.2rem;
     height: 2.2rem;
@@ -165,7 +234,7 @@ button:hover {
     justify-content: center;
     font-weight: bold;
     font-size: 1.1rem;
-    border: 2px solid #b0c4de;
+    border: 2px solid var(--progress-item-border);
     transition: background 0.3s, color 0.3s, border 0.3s;
 }
 
@@ -177,15 +246,21 @@ button:hover {
 }
 
 .progress-item.current {
-    border: 2px solid var(--primary-color);
-    background: #dbeafe;
+    border: 2px solid var(--progress-item-current-border);
+        background: var(--progress-item-current-bg);
+    }
+    
+    .progress-item.answered-incorrect {
+        background: var(--progress-item-answered-incorrect-bg);
+        color: var(--progress-item-answered-incorrect-text);
+        border: 2px solid var(--progress-item-answered-incorrect-border);
 }
 
 .hint-btn {
     margin-top: 1rem;
     padding: 0.6rem 1.2rem;
-    background-color: #fbbf24;
-    color: #2c3e50;
+    background-color: var(--hint-btn-bg);
+        color: var(--hint-btn-text);
     border: none;
     border-radius: 5px;
     font-size: 1rem;
@@ -196,8 +271,9 @@ button:hover {
 }
 
 .hint-btn:disabled {
-    background: #f3f4f6;
-    color: #b0b0b0;
+    background: var(--progress-item-bg);
+        color: var(--progress-item-text);
+        opacity: 0.7;
     cursor: not-allowed;
 }
 
@@ -213,20 +289,23 @@ button:hover {
     gap: 0.7rem;
     margin-bottom: 1.5rem;
     margin-top: 0.5rem;
+    background-color: var(--level-selector-bg);
+        padding: 0.5rem;
+        border-radius: 8px;
 }
 
 .level-selector label {
     font-weight: 500;
-    color: var(--secondary-color);
+    color: var(--text-color);
 }
 
 .level-selector select {
     padding: 0.4rem 0.8rem;
     border-radius: 5px;
-    border: 1.5px solid #b0c4de;
+    border: 1.5px solid var(--input-border-color);
     font-size: 1rem;
-    background: #f5f6fa;
-    color: var(--secondary-color);
+    background: var(--card-background-color);
+        color: var(--text-color);
 }
 
 .level-go-btn {
@@ -269,8 +348,66 @@ button:hover {
     background-color: #c0392b;
 }
 
-.progress-item.answered-incorrect {
-    background: #fee2e2;
-        color: #991b1b;
-        border: 2px solid #fca5a5;
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Theme Switcher Styles */
+.theme-switcher-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.theme-toggle-checkbox {
+    display: none;
+}
+
+.theme-toggle-label {
+    display: block;
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background-color: #ccc;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+body.dark-mode .theme-toggle-label {
+    background-color: #555;
+}
+
+.theme-toggle-inner {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.theme-toggle-switch {
+    /* This can be used for icons like sun/moon if desired, for now, it's part of the track */
+}
+
+.theme-toggle-checkbox:checked+.theme-toggle-label .theme-toggle-inner {
+    transform: translateX(24px);
+    background-color: var(--primary-color);
+}
+
+body.dark-mode .theme-toggle-checkbox:checked+.theme-toggle-label .theme-toggle-inner {
+    background-color: var(--hint-btn-bg);
 }
